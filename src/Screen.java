@@ -80,6 +80,10 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         }else{
             g.drawString("Looking at Block: null" , 20, 160);
         }
+        //image tests
+        //Image dirt = new Image();
+        //dirt.drawImage(g);
+        //--------
         drawMouseAim(g);
         SleepAndRefresh();
     }

@@ -26,10 +26,9 @@ public class Polygon {
 
     void drawPolygon(Graphics g) {
         if (draw) {
-            g.setColor(c);
-            g.fillPolygon(p);
-            g.setColor(Color.black);
-            g.drawPolygon(p);
+            Image texture = new Image(p);
+            texture.drawImage(g);
+
             if(Screen.polygonOver == this){
                 g.setColor(new Color(255, 255, 255, 100));
                 g.fillPolygon(p);
