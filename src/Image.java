@@ -16,32 +16,35 @@ public class Image {
         }
     }
 
-    java.awt.Polygon p;
+    //java.awt.Polygon p;
     static java.util.List<Polygon> quads = new java.util.ArrayList<>();
 
+    Color[] cachedColors = new Color[256];
 
-    public Image(Polygon p) {
-        this.p = p;
+
+    public Image() {
+        for (int i = 0; i < 256; i++) {
+            int x = i % image.getWidth();
+            int y = i / image.getWidth();
+            cachedColors[i] = new Color(image.getRGB(x, y));
+        }
     }
 
-    void drawImage(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    void drawImage(Graphics g, Polygon p) {
 
         quads.clear();
-        recursiveSubdivide(p, 4); // 2 levels → 4 → 16 quads
+        recursiveSubdivide(p, 4); // 4 levels → 16 x 16
 
         for (int i = 0; i < quads.size(); i++) {
             Polygon poly = quads.get(i);
-            int sampleX = (i % image.getWidth());
-            int sampleY = ((i / image.getWidth()) % image.getHeight());
-            g2d.setColor(new Color(image.getRGB(sampleX, sampleY)));
-            g2d.fillPolygon(poly);
+            Color c = cachedColors[(i % image.getWidth()) + (image.getWidth() * ((i / image.getWidth()) % image.getHeight()))];
+            g.setColor(c);
+            g.fillPolygon(poly);
         }
 
-        g2d.setColor(Color.black);
-        g2d.drawPolygon(p);
+        g.setColor(Color.black);
+        g.drawPolygon(p);
 
-        g2d.dispose();
     }//end drawPolygon
 
     private static Point midpoint(Point a, Point b) {

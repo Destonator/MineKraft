@@ -21,13 +21,12 @@ public class Polygon {
             p.ypoints[i] = (int) y[i];
             p.npoints = x.length;
         }
-
-    }
+    }//en updatePolygon
 
     void drawPolygon(Graphics g) {
         if (draw) {
-            Image texture = new Image(p);
-            texture.drawImage(g);
+            Image texture = new Image();
+            texture.drawImage(g, p);
 
             if(Screen.polygonOver == this){
                 g.setColor(new Color(255, 255, 255, 100));
@@ -38,5 +37,5 @@ public class Polygon {
 
     boolean MouseOver(){
         return p.contains(NewWindow.screenSize.getWidth()/2, NewWindow.screenSize.getHeight()/2);
-    }
+    }//end mouseOver
 }//end Polygon Class

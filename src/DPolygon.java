@@ -8,13 +8,14 @@ public class DPolygon {
     Polygon DrawabePolygon;
     double AvgDist;
     public Block parentBlock;
-
-    public DPolygon(double[] x, double[] y, double[]z, Color c, Block parentBlock) {
+    int side;
+    public DPolygon(double[] x, double[] y, double[]z, Color c, Block parentBlock, int side) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.c = c;
         this.parentBlock = parentBlock;
+        this.side = side;
         createPolygon();
     }
 

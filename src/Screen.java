@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 public class Screen extends JPanel implements KeyListener, MouseListener, MouseMotionListener {
     static ArrayList<DPolygon> DPolygons = new ArrayList<DPolygon>();
-    //static ArrayList<Block> blocks = new ArrayList<Block>();
+    static ArrayList<DPolygon> RenderPolygons = new ArrayList<DPolygon>();
+
     double SleepTime = 1000.0/30.0;//30 frames per second
     double LastRefresh = 0.0;
 
@@ -29,7 +30,6 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
     boolean centeringMouse = true;
 
     public Screen() {
-
         World.Generate();
 
         addKeyListener(this);
@@ -51,11 +51,12 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         for (DPolygon dPolygon : DPolygons) {//updates polygons
             dPolygon.updatePolygon();
         }
+        setRenderPolygons();
         setOrder();
         setPolygonOver();
 
         for(int i = 0; i < NewOrder.length; i++) {//draws polygon
-            DPolygons.get(NewOrder[i]).GetDrawabePolygon().drawPolygon(g);
+            RenderPolygons.get(NewOrder[i]).GetDrawabePolygon().drawPolygon(g);
         }
         //debug
         g.setColor(new Color(255, 255, 255, 100));
@@ -80,19 +81,55 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         }else{
             g.drawString("Looking at Block: null" , 20, 160);
         }
-        //image tests
-        //Image dirt = new Image();
-        //dirt.drawImage(g);
-        //--------
+
         drawMouseAim(g);
         SleepAndRefresh();
     }
 
+    private void setRenderPolygons() {
+        RenderPolygons.clear();
+        for(DPolygon dPolygon : DPolygons) {
+            if(dPolygon.side == 1){
+                if(ViewFrom[2] < dPolygon.parentBlock.getZ()){
+                    RenderPolygons.add(dPolygon);
+                }
+            }
+            else if(dPolygon.side == 2){
+                if(ViewFrom[2] > dPolygon.parentBlock.getZ()){
+                    RenderPolygons.add(dPolygon);
+                }
+            }
+            else if(dPolygon.side == 3){
+                if(ViewFrom[0] < dPolygon.parentBlock.getX()){
+                    RenderPolygons.add(dPolygon);
+                }
+            }
+            else if(dPolygon.side == 4){
+                if(ViewFrom[0] > dPolygon.parentBlock.getX()){
+                    RenderPolygons.add(dPolygon);
+                }
+            }
+            else if(dPolygon.side == 5){
+                if(ViewFrom[1] > dPolygon.parentBlock.getY()){
+                    RenderPolygons.add(dPolygon);
+                }
+            }
+            else if(dPolygon.side == 6){
+                if(ViewFrom[1] < dPolygon.parentBlock.getY()){
+                    RenderPolygons.add(dPolygon);
+                }
+            }
+            else{
+                RenderPolygons.add(dPolygon);
+            }
+        }
+    }//end renderPolygons
+
     void setOrder(){
-        double[] k = new double[DPolygons.size()];
-        NewOrder = new int[DPolygons.size()];
-        for(int i = 0; i < DPolygons.size(); i++) {
-            k[i] = DPolygons.get(i).AvgDist;
+        double[] k = new double[RenderPolygons.size()];
+        NewOrder = new int[RenderPolygons.size()];
+        for(int i = 0; i < RenderPolygons.size(); i++) {
+            k[i] = RenderPolygons.get(i).AvgDist;
             NewOrder[i] = i;
         }
 
@@ -153,68 +190,47 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         Vector ViewVector = new Vector(ViewTo[0] - ViewFrom[0], ViewTo[1] - ViewFrom[1], ViewTo[2] - ViewFrom[2]);
         Vector VerticalVector = new Vector(0,0,1);
         Vector SideViewVector = VerticalVector.CrossProduct(ViewVector);
+        double dx = ViewTo[0] - ViewFrom[0];
+        double dy = ViewTo[1] - ViewFrom[1];
+        double length = Math.sqrt(dx*dx + dy*dy);
+        dx /= length;
+        dy /= length;
+        double sideX = -dy;
+        double sideY = dx;
+
         if(Keys[4]) {//Move Forward
-            double dx = ViewTo[0] - ViewFrom[0];
-            double dy = ViewTo[1] - ViewFrom[1];
-            double length = Math.sqrt(dx*dx + dy*dy);
-            dx /= length;
-            dy /= length;
             ViewFrom[0] += moveSpeed* dx;
             ViewFrom[1] += moveSpeed* dy;
             ViewTo[0] += moveSpeed* dx;
             ViewTo[1] += moveSpeed* dy;
         }
         if(Keys[5]) {//Move Left
-            double dx = ViewTo[0] - ViewFrom[0];
-            double dy = ViewTo[1] - ViewFrom[1];
-            double length = Math.sqrt(dx * dx + dy * dy);
-            dx /= length;
-            dy /= length;
-
-            double sideX = -dy;
-            double sideY = dx;
-
             ViewFrom[0] -= moveSpeed * sideX;
             ViewFrom[1] -= moveSpeed * sideY;
             ViewTo[0] -= moveSpeed * sideX;
             ViewTo[1] -= moveSpeed * sideY;
         }
         if(Keys[6]) {//Move Backward
-            double dx = ViewTo[0] - ViewFrom[0];
-            double dy = ViewTo[1] - ViewFrom[1];
-            double length = Math.sqrt(dx*dx + dy*dy);
-            dx /= length;
-            dy /= length;
             ViewFrom[0] -= moveSpeed* dx;
             ViewFrom[1] -= moveSpeed* dy;
             ViewTo[0] -= moveSpeed* dx;
             ViewTo[1] -= moveSpeed* dy;
         }
         if(Keys[7]) {//Move Right
-            double dx = ViewTo[0] - ViewFrom[0];
-            double dy = ViewTo[1] - ViewFrom[1];
-            double length = Math.sqrt(dx * dx + dy * dy);
-            dx /= length;
-            dy /= length;
-
-            // Perpendicular vector (rotate by 90 degrees counter-clockwise)
-            double sideX = -dy;
-            double sideY = dx;
-
             ViewFrom[0] += moveSpeed * sideX;
             ViewFrom[1] += moveSpeed * sideY;
             ViewTo[0] += moveSpeed * sideX;
             ViewTo[1] += moveSpeed * sideY;
         }
-        if(Keys[8]) {
+        if(Keys[8]) {//fly up
             ViewFrom[2] += moveSpeed;
             ViewTo[2] += moveSpeed;
         }
-        if(Keys[9]) {
+        if(Keys[9]) {//fly down
             ViewFrom[2] -= moveSpeed;
             ViewTo[2] -= moveSpeed;
         }
-    }
+    }//end Controls
 
     void setPolygonOver(){
         polygonOver = null;
