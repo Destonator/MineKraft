@@ -236,13 +236,13 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         polygonOver = null;
         blockOver = null;
         for (int i = NewOrder.length - 1; i >= 0; i--) {
-            if(DPolygons.get(NewOrder[i]).GetDrawabePolygon().MouseOver() && DPolygons.get(NewOrder[i]).draw) {
-                polygonOver = DPolygons.get(NewOrder[i]).GetDrawabePolygon();
-                blockOver = DPolygons.get(NewOrder[i]).GetParentBlock();
+            if(RenderPolygons.get(NewOrder[i]).GetDrawabePolygon().MouseOver() && RenderPolygons.get(NewOrder[i]).draw) {
+                polygonOver = RenderPolygons.get(NewOrder[i]).GetDrawabePolygon();
+                blockOver = RenderPolygons.get(NewOrder[i]).GetParentBlock();
                 blockOverSide = 0;
                 for(int j = 0; j < 6; j++) {
                     blockOverSide++;
-                    if(blockOver.p[j] == DPolygons.get(NewOrder[i])){
+                    if(blockOver.p[j] == RenderPolygons.get(NewOrder[i])){
                         break;
                     }
                 }
