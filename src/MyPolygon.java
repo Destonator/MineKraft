@@ -1,16 +1,17 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
-public class Polygon {
-    java.awt.Polygon p;
-    Color c;
+public class MyPolygon {
+    BufferedImage image;
+    Polygon p;
     boolean draw = true;
 
-    public Polygon(double[] x, double[] y, Color c) {
-        p = new java.awt.Polygon();
+    public MyPolygon(double[] x, double[] y, BufferedImage image) {
+        p = new Polygon();
         for (int i = 0; i < x.length; i++) {
             p.addPoint((int)x[i], (int)y[i]);
         }
-        this.c = c;
+        this.image = image;
     }
 
     void updatePolygon(double[] x, double[] y) {
@@ -25,9 +26,8 @@ public class Polygon {
 
     void drawPolygon(Graphics g) {
         if (draw) {
-            Image texture = new Image();
+            Image texture = new Image(image);
             texture.drawImage(g, p);
-
             if(Screen.polygonOver == this){
                 g.setColor(new Color(255, 255, 255, 100));
                 g.fillPolygon(p);

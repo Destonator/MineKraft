@@ -4,14 +4,17 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+
 public class Screen extends JPanel implements KeyListener, MouseListener, MouseMotionListener {
+
+
     static ArrayList<DPolygon> DPolygons = new ArrayList<DPolygon>();
     static ArrayList<DPolygon> RenderPolygons = new ArrayList<DPolygon>();
 
     double SleepTime = 1000.0/30.0;//30 frames per second
     double LastRefresh = 0.0;
 
-    static Polygon polygonOver = null;
+    static MyPolygon polygonOver = null;
     static Block blockOver = null;
     static int blockOverSide = 0;
 
@@ -28,6 +31,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
 
     boolean[] Keys = new boolean[10];
     boolean centeringMouse = true;
+    boolean needsUpdate = true;
 
     public Screen() {
         World.Generate();
@@ -72,8 +76,9 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
                 String.format("%.2f", ViewTo[1]) + ", " +
                 String.format("%.2f", ViewTo[2]), 20, 60);
         g.drawString("Vert Look: " + VertLook, 20, 80);
-        g.drawString("Blocks: " + World.wBlocks.size(), 20, 100);
-        g.drawString("Hor Look: " + HorLook, 20, 120);
+        g.drawString("Hor Look: " + HorLook, 20, 100);
+
+        g.drawString("Blocks: " + World.wBlocks.size(), 20, 120);
         g.drawString("Polgons: " + NewOrder.length, 20, 140);
 
         if(blockOver != null) {
@@ -87,40 +92,36 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
     }
 
     private void setRenderPolygons() {
-        RenderPolygons.clear();
-        for(DPolygon dPolygon : DPolygons) {
-            if(dPolygon.side == 1){
-                if(ViewFrom[2] < dPolygon.parentBlock.getZ()){
+        if(needsUpdate) {
+            RenderPolygons.clear();
+            for (DPolygon dPolygon : DPolygons) {
+                if (dPolygon.side == 1) {
+                    if (ViewFrom[2] < dPolygon.parentBlock.getZ()) {
+                        RenderPolygons.add(dPolygon);
+                    }
+                } else if (dPolygon.side == 2) {
+                    if (ViewFrom[2] > dPolygon.parentBlock.getZ()) {
+                        RenderPolygons.add(dPolygon);
+                    }
+                } else if (dPolygon.side == 3) {
+                    if (ViewFrom[0] < dPolygon.parentBlock.getX()) {
+                        RenderPolygons.add(dPolygon);
+                    }
+                } else if (dPolygon.side == 4) {
+                    if (ViewFrom[0] > dPolygon.parentBlock.getX()) {
+                        RenderPolygons.add(dPolygon);
+                    }
+                } else if (dPolygon.side == 5) {
+                    if (ViewFrom[1] > dPolygon.parentBlock.getY()) {
+                        RenderPolygons.add(dPolygon);
+                    }
+                } else if (dPolygon.side == 6) {
+                    if (ViewFrom[1] < dPolygon.parentBlock.getY()) {
+                        RenderPolygons.add(dPolygon);
+                    }
+                } else {
                     RenderPolygons.add(dPolygon);
                 }
-            }
-            else if(dPolygon.side == 2){
-                if(ViewFrom[2] > dPolygon.parentBlock.getZ()){
-                    RenderPolygons.add(dPolygon);
-                }
-            }
-            else if(dPolygon.side == 3){
-                if(ViewFrom[0] < dPolygon.parentBlock.getX()){
-                    RenderPolygons.add(dPolygon);
-                }
-            }
-            else if(dPolygon.side == 4){
-                if(ViewFrom[0] > dPolygon.parentBlock.getX()){
-                    RenderPolygons.add(dPolygon);
-                }
-            }
-            else if(dPolygon.side == 5){
-                if(ViewFrom[1] > dPolygon.parentBlock.getY()){
-                    RenderPolygons.add(dPolygon);
-                }
-            }
-            else if(dPolygon.side == 6){
-                if(ViewFrom[1] < dPolygon.parentBlock.getY()){
-                    RenderPolygons.add(dPolygon);
-                }
-            }
-            else{
-                RenderPolygons.add(dPolygon);
             }
         }
     }//end renderPolygons
@@ -155,14 +156,13 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         BufferedImage cursorImage = new BufferedImage(1, 1, BufferedImage.TRANSLUCENT);
         Cursor invisibleCursor = toolkit.createCustomCursor(cursorImage, new Point(0,0), "InvisibleCursor");
         setCursor(invisibleCursor);
-    }
+    }//end invisibleMouse
 
-    void drawMouseAim(Graphics g)
-    {
+    void drawMouseAim(Graphics g) {
         g.setColor(Color.black);
         g.drawLine((int)(NewWindow.screenSize.getWidth()/2 - aimSight), (int)(NewWindow.screenSize.getHeight()/2), (int)(NewWindow.screenSize.getWidth()/2 + aimSight), (int)(NewWindow.screenSize.getHeight()/2));
         g.drawLine((int)(NewWindow.screenSize.getWidth()/2), (int)(NewWindow.screenSize.getHeight()/2 - aimSight), (int)(NewWindow.screenSize.getWidth()/2), (int)(NewWindow.screenSize.getHeight()/2 + aimSight));
-    }
+    }//end drawMouseAim
 
     void SleepAndRefresh() {
         while(true) {
@@ -179,7 +179,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
                 }
             }
         }
-    }
+    }//end SleepAndRefresh
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -199,34 +199,40 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         double sideY = dx;
 
         if(Keys[4]) {//Move Forward
+            needsUpdate = true;
             ViewFrom[0] += moveSpeed* dx;
             ViewFrom[1] += moveSpeed* dy;
             ViewTo[0] += moveSpeed* dx;
             ViewTo[1] += moveSpeed* dy;
         }
         if(Keys[5]) {//Move Left
+            needsUpdate = true;
             ViewFrom[0] -= moveSpeed * sideX;
             ViewFrom[1] -= moveSpeed * sideY;
             ViewTo[0] -= moveSpeed * sideX;
             ViewTo[1] -= moveSpeed * sideY;
         }
         if(Keys[6]) {//Move Backward
+            needsUpdate = true;
             ViewFrom[0] -= moveSpeed* dx;
             ViewFrom[1] -= moveSpeed* dy;
             ViewTo[0] -= moveSpeed* dx;
             ViewTo[1] -= moveSpeed* dy;
         }
         if(Keys[7]) {//Move Right
+            needsUpdate = true;
             ViewFrom[0] += moveSpeed * sideX;
             ViewFrom[1] += moveSpeed * sideY;
             ViewTo[0] += moveSpeed * sideX;
             ViewTo[1] += moveSpeed * sideY;
         }
         if(Keys[8]) {//fly up
+            needsUpdate = true;
             ViewFrom[2] += moveSpeed;
             ViewTo[2] += moveSpeed;
         }
         if(Keys[9]) {//fly down
+            needsUpdate = true;
             ViewFrom[2] -= moveSpeed;
             ViewTo[2] -= moveSpeed;
         }
@@ -271,7 +277,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
             HorLook += 0.999;
         }
         updateView();
-    }
+    }//end MouseMovement
 
     void updateView() {
         // Clamp vertical look between -89 and +89 degrees
@@ -290,7 +296,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         ViewTo[0] = ViewFrom[0] + dx * viewDistance;
         ViewTo[1] = ViewFrom[1] + dy * viewDistance;
         ViewTo[2] = ViewFrom[2] + dz * viewDistance;
-    }
+    }//end updateView
 
     void CenterMouse(){
         if(r == null) {
@@ -305,7 +311,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         int centerY = panelPos.y + getHeight()/2;
         centeringMouse = true;
         r.mouseMove(centerX, centerY);
-    }
+    }//end CenterMouse
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -341,7 +347,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
             if(blockOver != null) {
                 World.removeBlock(blockOver);
             }
-        }
+        }//end removeBlock
         if(e.getButton() == MouseEvent.BUTTON3) {
             if(blockOver != null) {
                 if(blockOverSide == 1){

@@ -1,26 +1,30 @@
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class DPolygon {
-    Color c;
+    BufferedImage texture;
     double[] x, y, z;
     boolean draw = true;
     double[] CalcPos, newX, newY;
-    Polygon DrawabePolygon;
+    MyPolygon DrawabePolygon;
     double AvgDist;
     public Block parentBlock;
     int side;
-    public DPolygon(double[] x, double[] y, double[]z, Color c, Block parentBlock, int side) {
+    public DPolygon(double[] x, double[] y, double[]z, Block parentBlock, int side, BufferedImage texture) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.c = c;
         this.parentBlock = parentBlock;
         this.side = side;
+        this.texture = texture;
         createPolygon();
     }
 
     void createPolygon() {
-        DrawabePolygon = new Polygon(new double[x.length], new double[x.length], c);
+        DrawabePolygon = new MyPolygon(new double[x.length], new double[x.length], texture);
     }
 
     void updatePolygon() {
@@ -53,7 +57,7 @@ public class DPolygon {
                 (Screen.ViewFrom[2] -z[i]) * (Screen.ViewFrom[2] -z[i]));
     }
 
-    public Polygon GetDrawabePolygon() {
+    public MyPolygon GetDrawabePolygon() {
         return DrawabePolygon;
     }
 
