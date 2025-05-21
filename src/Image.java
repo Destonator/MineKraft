@@ -2,14 +2,10 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 public class Image {
     static java.util.List<Polygon> quads = new java.util.ArrayList<>();
-
     Color[] cachedColors = new Color[256];
-
 
     public Image(BufferedImage image) {
         for (int i = 0; i < 256; i++) {
@@ -22,7 +18,6 @@ public class Image {
     void drawImage(Graphics g, Polygon p) {
         generateGrid(p, 16);
 
-
         for (int i = 0; i < quads.size(); i++) {
             Polygon poly = quads.get(i);
             //Color c = cachedColors[(i % image.getWidth()) + (image.getWidth() * ((i / image.getWidth()) % image.getHeight()))];
@@ -32,8 +27,8 @@ public class Image {
             g.fillPolygon(poly);
         }
 
-        g.setColor(Color.black);
-        g.drawPolygon(p);
+        //g.setColor(Color.black);
+        //g.drawPolygon(p);
     }//end drawPolygon
 
     public static void generateGrid(Polygon outer, int tilesPerSide) {

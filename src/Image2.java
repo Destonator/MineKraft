@@ -1,12 +1,14 @@
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.geom.Point2D;
-import java.io.File;
-import java.io.IOException;
 
 public class Image2 {
-    public static void renderImage(Graphics g, BufferedImage src, java.awt.Polygon dest) {
+    static BufferedImage src;
+    public Image2(BufferedImage src) {
+        this.src = src;
+    }
+
+    public void drawImage(Graphics g, Polygon dest) {
         Point2D[] destPoints = new Point2D[dest.npoints];
         destPoints[0] = new Point2D.Double(dest.xpoints[0], dest.ypoints[0]);
         destPoints[1] = new Point2D.Double(dest.xpoints[1], dest.ypoints[1]);
@@ -51,6 +53,7 @@ public class Image2 {
         }
 
         g.drawImage(output, bounds.x, bounds.y, null);
+        g.drawPolygon(dest);
     }
 
     private static double[] applyHomography(double[][] H, double x, double y) {
@@ -71,7 +74,16 @@ public class Image2 {
             maxY = Math.max(maxY, p.getY());
         }
 
-        return new Rectangle((int) minX, (int) minY, (int) (maxX - minX), (int) (maxY - minY));
+        int x = (int) Math.floor(minX);
+        int y = (int) Math.floor(minY);
+        int w = (int) Math.ceil(maxX - minX);
+        int h = (int) Math.ceil(maxY - minY);
+
+        if(w <= 0 || h <=0 || w > 10000 || h > 10000) {
+            return new Rectangle(0, 0, 1, 1);
+        }
+
+        return new Rectangle(x, y, w, h);
     }
 
     private static double[][] invertHomography(double[][] H) {
@@ -90,4 +102,4 @@ public class Image2 {
         }
         return inv;
     }
-}
+}//end class

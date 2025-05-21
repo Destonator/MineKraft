@@ -7,31 +7,30 @@ import java.util.ArrayList;
 
 public class Screen extends JPanel implements KeyListener, MouseListener, MouseMotionListener {
 
-
     static ArrayList<DPolygon> DPolygons = new ArrayList<DPolygon>();
     static ArrayList<DPolygon> RenderPolygons = new ArrayList<DPolygon>();
-
-    double SleepTime = 1000.0/30.0;//30 frames per second
-    double LastRefresh = 0.0;
 
     static MyPolygon polygonOver = null;
     static Block blockOver = null;
     static int blockOverSide = 0;
 
-    static double[] ViewFrom = new double[] {-5,0,2};
-    static double[] ViewTo =  new double[] {0,0,2};
+    static double[] ViewFrom = new double[] {-5,0,6};
+    static double[] ViewTo =  new double[] {0,0,6};
 
     int[] NewOrder;
 
     Robot r;//to keep mouse centered
 
+    double drawFPS = 0, MaxFPS = 60, SleepTime = 1000.0/MaxFPS, LastRefresh = 0, StartTime = System.currentTimeMillis(), LastFPSCheck = 0, Checks = 0, deltaTime = 0;
     //Higher HorRot&VertRot means slower speed
-    double VertLook = 0, HorLook = 0, aimSight = 7, HorRotSpeed = 1900, VertRotSpeed = 5000;
-    static double moveSpeed = 0.1, zoom = 250, MouseX = 0, MouseY = 0;
+    double VertLook = 0, HorLook = 0, aimSight = 7, HorRotSpeed = 190, VertRotSpeed = 500;
+    static double moveConstantSpeed = 2, zoom = 250, MouseX = 0, MouseY = 0;
 
     boolean[] Keys = new boolean[10];
     boolean centeringMouse = true;
     boolean needsUpdate = true;
+
+    long lastTime = System.currentTimeMillis();
 
     public Screen() {
         World.Generate();
@@ -47,17 +46,23 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
     }
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        long currentTime = System.nanoTime();
+        deltaTime = (currentTime - lastTime) / 1_000_000_000.0; // seconds
+        lastTime = currentTime;
+
         Controls();
+
         g.clearRect(0, 0, getWidth(), getHeight());
+        if (needsUpdate) {
+            Calculator.SetPrederterminedInfo();
 
-        Calculator.SetPrederterminedInfo();
-
-        for (DPolygon dPolygon : DPolygons) {//updates polygons
-            dPolygon.updatePolygon();
+            for (DPolygon dPolygon : DPolygons) {//updates polygons
+                dPolygon.updatePolygon();
+            }
+            setRenderPolygons();
+            setOrder();
+            setPolygonOver();
         }
-        setRenderPolygons();
-        setOrder();
-        setPolygonOver();
 
         for(int i = 0; i < NewOrder.length; i++) {//draws polygon
             RenderPolygons.get(NewOrder[i]).GetDrawabePolygon().drawPolygon(g);
@@ -66,7 +71,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         g.setColor(new Color(255, 255, 255, 100));
         g.fillRect(0, 0, 250, 170);
         g.setColor(Color.BLACK);
-        g.drawString(System.currentTimeMillis() + "", 20, 20);
+        g.drawString("FPS: " + (int)drawFPS + " (Benchmark)", 20, 20);
         g.drawString("View From: " +
                 String.format("%.2f", ViewFrom[0]) + ", " +
                 String.format("%.2f", ViewFrom[1]) + ", " +
@@ -164,22 +169,33 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         g.drawLine((int)(NewWindow.screenSize.getWidth()/2), (int)(NewWindow.screenSize.getHeight()/2 - aimSight), (int)(NewWindow.screenSize.getWidth()/2), (int)(NewWindow.screenSize.getHeight()/2 + aimSight));
     }//end drawMouseAim
 
-    void SleepAndRefresh() {
-        while(true) {
-            if((System.currentTimeMillis() - LastRefresh) > SleepTime) {
-                LastRefresh = System.currentTimeMillis();
-                repaint();
-                break;
-            }
-            else{
-                try{
-                    Thread.sleep((long)(SleepTime - (System.currentTimeMillis()-LastRefresh)));
-                }catch(Exception e){
 
-                }
-            }
+void SleepAndRefresh()
+{
+    long timeSLU = (long) (System.currentTimeMillis() - LastRefresh);
+
+    Checks ++;
+    if(Checks >= 15)
+    {
+        drawFPS = Checks/((System.currentTimeMillis() - LastFPSCheck)/1000.0);
+        LastFPSCheck = System.currentTimeMillis();
+        Checks = 0;
+    }
+
+    if(timeSLU < 1000.0/MaxFPS)
+    {
+        try {
+            Thread.sleep((long) (1000.0/MaxFPS - timeSLU));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-    }//end SleepAndRefresh
+    }
+
+    LastRefresh = System.currentTimeMillis();
+
+    repaint();
+}
+
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -197,42 +213,37 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         dy /= length;
         double sideX = -dy;
         double sideY = dx;
+        double moveSpeed = moveConstantSpeed*deltaTime;
 
         if(Keys[4]) {//Move Forward
-            needsUpdate = true;
             ViewFrom[0] += moveSpeed* dx;
             ViewFrom[1] += moveSpeed* dy;
             ViewTo[0] += moveSpeed* dx;
             ViewTo[1] += moveSpeed* dy;
         }
         if(Keys[5]) {//Move Left
-            needsUpdate = true;
             ViewFrom[0] -= moveSpeed * sideX;
             ViewFrom[1] -= moveSpeed * sideY;
             ViewTo[0] -= moveSpeed * sideX;
             ViewTo[1] -= moveSpeed * sideY;
         }
         if(Keys[6]) {//Move Backward
-            needsUpdate = true;
             ViewFrom[0] -= moveSpeed* dx;
             ViewFrom[1] -= moveSpeed* dy;
             ViewTo[0] -= moveSpeed* dx;
             ViewTo[1] -= moveSpeed* dy;
         }
         if(Keys[7]) {//Move Right
-            needsUpdate = true;
             ViewFrom[0] += moveSpeed * sideX;
             ViewFrom[1] += moveSpeed * sideY;
             ViewTo[0] += moveSpeed * sideX;
             ViewTo[1] += moveSpeed * sideY;
         }
         if(Keys[8]) {//fly up
-            needsUpdate = true;
             ViewFrom[2] += moveSpeed;
             ViewTo[2] += moveSpeed;
         }
         if(Keys[9]) {//fly down
-            needsUpdate = true;
             ViewFrom[2] -= moveSpeed;
             ViewTo[2] -= moveSpeed;
         }
@@ -261,8 +272,8 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
         double difX = NewWindow.screenSize.getWidth()/2 - NewMouseX;
         double difY = NewWindow.screenSize.getHeight()/2 - NewMouseY;
         difY *= 6 - Math.abs(VertLook) * 5;
-        VertLook += difY / VertRotSpeed;
-        HorLook -= difX / HorRotSpeed;
+        VertLook += (difY / VertRotSpeed) * deltaTime;
+        HorLook -= (difX / HorRotSpeed) * deltaTime;
 
         if(VertLook>0.999){
             VertLook = 0.999;
@@ -315,6 +326,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
 
     @Override
     public void keyPressed(KeyEvent e) {
+        needsUpdate = true;
         if(e.getKeyCode() == KeyEvent.VK_LEFT) {Keys[0] = true;}
         if(e.getKeyCode() == KeyEvent.VK_RIGHT) {Keys[1] = true;}
         if(e.getKeyCode() == KeyEvent.VK_UP) {Keys[2] = true;}
@@ -343,6 +355,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        needsUpdate = true;
         if(e.getButton() == MouseEvent.BUTTON1) {
             if(blockOver != null) {
                 World.removeBlock(blockOver);
@@ -404,6 +417,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
             centeringMouse = false;
             return;
         }
+        needsUpdate = true;
         MouseMovement(e.getX(), e.getY());
         MouseX = e.getX();
         MouseY = e.getY();
