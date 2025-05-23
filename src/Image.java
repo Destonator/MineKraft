@@ -1,4 +1,3 @@
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
@@ -7,12 +6,8 @@ public class Image {
     static java.util.List<Polygon> quads = new java.util.ArrayList<>();
     Color[] cachedColors = new Color[256];
 
-    public Image(BufferedImage image) {
-        for (int i = 0; i < 256; i++) {
-            int y = image.getWidth() - 1 - (i % image.getWidth());
-            int x = i / image.getWidth();
-            cachedColors[i] = new Color(image.getRGB(x, y));
-        }
+    public Image(Integer textureId) {
+        cachedColors = Textures.cachedColors[textureId];
     }
 
     void drawImage(Graphics g, Polygon p) {
@@ -20,7 +15,6 @@ public class Image {
 
         for (int i = 0; i < quads.size(); i++) {
             Polygon poly = quads.get(i);
-            //Color c = cachedColors[(i % image.getWidth()) + (image.getWidth() * ((i / image.getWidth()) % image.getHeight()))];
             Color c = cachedColors[i];
 
             g.setColor(c);

@@ -33,6 +33,7 @@ public class Screen extends JPanel implements KeyListener, MouseListener, MouseM
     long lastTime = System.currentTimeMillis();
 
     public Screen() {
+        Textures textureInfo = new Textures();
         World.Generate();
 
         addKeyListener(this);

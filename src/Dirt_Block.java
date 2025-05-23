@@ -1,48 +1,36 @@
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 public class Dirt_Block extends Block {
-    static BufferedImage texture;
-    static {
-        try {
-            texture = ImageIO.read(new File("textures/blocks/dirt.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
     public Dirt_Block(int x, int y, int z) {
         super(x, y, z);
     }
 
     @Override
-    BufferedImage getBottomTexture() {
-        return texture;
+    int getBottomTexture() {
+        return 0;
     }
 
     @Override
-    BufferedImage getTopTexture() {
-        return texture;
+    int getTopTexture() {
+        return 0;
     }
 
     @Override
-    BufferedImage getFrontTexture() {
-        return texture;
+    int getFrontTexture() {
+        return 0;
     }
 
     @Override
-    BufferedImage getBackTexture() {
-        return texture;
+    int getBackTexture() {
+        return 0;
     }
 
     @Override
-    BufferedImage getLeftTexture() {
-        return texture;
+    int getLeftTexture() {
+        return 0;
     }
 
     @Override
-    BufferedImage getRightTexture() {
-        return texture;
+    int getRightTexture() {
+        return 0;
     }
 }

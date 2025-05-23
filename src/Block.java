@@ -40,12 +40,12 @@ public abstract class Block {
         }
     }//end UpdateBlock
 
-    abstract BufferedImage getBottomTexture();
-    abstract BufferedImage getTopTexture();
-    abstract BufferedImage getFrontTexture();
-    abstract BufferedImage getBackTexture();
-    abstract BufferedImage getLeftTexture();
-    abstract BufferedImage getRightTexture();
+    abstract int getBottomTexture();
+    abstract int getTopTexture();
+    abstract int getFrontTexture();
+    abstract int getBackTexture();
+    abstract int getLeftTexture();
+    abstract int getRightTexture();
 
     public void remove(){
         for (DPolygon dPolygon : p) {

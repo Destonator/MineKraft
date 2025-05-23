@@ -1,11 +1,5 @@
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 public class DPolygon {
-    BufferedImage texture;
+    int textureId;
     double[] x, y, z;
     boolean draw = true;
     double[] CalcPos, newX, newY;
@@ -13,18 +7,18 @@ public class DPolygon {
     double AvgDist;
     public Block parentBlock;
     int side;
-    public DPolygon(double[] x, double[] y, double[]z, Block parentBlock, int side, BufferedImage texture) {
+    public DPolygon(double[] x, double[] y, double[]z, Block parentBlock, int side, int textureId) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.parentBlock = parentBlock;
         this.side = side;
-        this.texture = texture;
+        this.textureId = textureId;
         createPolygon();
     }
 
     void createPolygon() {
-        DrawabePolygon = new MyPolygon(new double[x.length], new double[x.length], texture);
+        DrawabePolygon = new MyPolygon(new double[x.length], new double[x.length], textureId);
     }
 
     void updatePolygon() {

@@ -3,27 +3,26 @@ import java.awt.image.BufferedImage;
 import java.awt.geom.Point2D;
 
 public class Image2 {
-    static BufferedImage src;
-    public Image2(BufferedImage src) {
-        this.src = src;
+    private final int textureId;
+
+    public Image2(int textureId) {
+        this.textureId = textureId;
     }
 
     public void drawImage(Graphics g, Polygon dest) {
-        Point2D[] destPoints = new Point2D[dest.npoints];
-        destPoints[0] = new Point2D.Double(dest.xpoints[0], dest.ypoints[0]);
-        destPoints[1] = new Point2D.Double(dest.xpoints[1], dest.ypoints[1]);
-        destPoints[2] = new Point2D.Double(dest.xpoints[2], dest.ypoints[2]);
-        destPoints[3] = new Point2D.Double(dest.xpoints[3], dest.ypoints[3]);
+        Point2D[] destPoints = new Point2D[4];
+        for (int i = 0; i < 4; i++) {
+            destPoints[i] = new Point2D.Double(dest.xpoints[i], dest.ypoints[i]);
+        }
 
-        int width = src.getWidth();
-        int height = src.getHeight();
+        int texSize = 16;
 
         // Source rectangle (image corners)
         Point2D[] srcPoints = {
                 new Point2D.Double(-0.5, -0.5),
-                new Point2D.Double(width - 0.5, -0.5),
-                new Point2D.Double(width - 0.5, height - 0.5),
-                new Point2D.Double(-0.5, height - 0.5),
+                new Point2D.Double(texSize - 0.5, -0.5),
+                new Point2D.Double(texSize - 0.5, texSize - 0.5),
+                new Point2D.Double(-0.5, texSize - 0.5),
         };
 
         // Compute forward homography (source → dest)
@@ -36,7 +35,7 @@ public class Image2 {
         Rectangle bounds = computeBoundingBox(destPoints);
 
         BufferedImage output = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
-
+        Color[] tex = Textures.cachedColors[textureId];
         for (int y = 0; y < bounds.height; y++) {
             for (int x = 0; x < bounds.width; x++) {
                 // Map (x + bounds.x, y + bounds.y) to source using Hinv
@@ -45,15 +44,15 @@ public class Image2 {
                 int sx = (int) Math.round(srcCoord[0]);
                 int sy = (int) Math.round(srcCoord[1]);
 
-                if (sx >= 0 && sy >= 0 && sx < width && sy < height) {
-                    int rgb = src.getRGB(sx, sy);
-                    output.setRGB(x, y, rgb);
+                if (sx >= 0 && sy >= 0 && sx < texSize && sy < texSize) {
+                    Color c = tex[sy + (sx * texSize)];
+                    output.setRGB(x, y, c.getRGB());
                 }
             }
         }
 
         g.drawImage(output, bounds.x, bounds.y, null);
-        g.drawPolygon(dest);
+        //g.drawPolygon(dest);
     }
 
     private static double[] applyHomography(double[][] H, double x, double y) {

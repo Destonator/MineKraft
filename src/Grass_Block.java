@@ -1,64 +1,36 @@
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 public class Grass_Block extends Block {
-    static BufferedImage bTexture;
-    static {
-        try {
-            bTexture = ImageIO.read(new File("textures/blocks/dirt.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    static BufferedImage sTexture;
-    static {
-        try {
-            sTexture = ImageIO.read(new File("textures/blocks/grass_block_side.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    static BufferedImage tTexture;
-    static {
-        try {
-            tTexture = ImageIO.read(new File("textures/blocks/grass_block_top.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
     public Grass_Block(int x, int y, int z) {
         super(x, y, z);
     }
 
     @Override
-    BufferedImage getBottomTexture() {
-        return bTexture;
+    int getBottomTexture() {
+        return 0;
     }
 
     @Override
-    BufferedImage getTopTexture() {
-        return tTexture;
+    int getTopTexture() {
+        return 2;
     }
 
     @Override
-    BufferedImage getFrontTexture() {
-        return sTexture;
+    int getFrontTexture() {
+        return 1;
     }
 
     @Override
-    BufferedImage getBackTexture() {
-        return sTexture;
+    int getBackTexture() {
+        return 1;
     }
 
     @Override
-    BufferedImage getLeftTexture() {
-        return sTexture;
+    int getLeftTexture() {
+        return 1;
     }
 
     @Override
-    BufferedImage getRightTexture() {
-        return sTexture;
+    int getRightTexture() {
+        return 1;
     }
 }
